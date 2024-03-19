@@ -56,7 +56,8 @@ func (f Font) String() string {
 type BarCode128 struct {
 	Coordinates
 	// Code is the code to display as an EAN 128 bar code.
-	Code string
+	Code   string
+	Height int
 }
 
 func NewBarCode(x, y int, code string) BarCode128 {
@@ -69,6 +70,11 @@ func NewBarCode(x, y int, code string) BarCode128 {
 	}
 }
 
+func (bc BarCode128) WithHeight(height int) BarCode128 {
+	bc.Height = height
+	return bc
+}
+
 func (bc BarCode128) String() string {
 	var sb strings.Builder
 
@@ -77,6 +83,11 @@ func (bc BarCode128) String() string {
 
 	// bar code
 	sb.WriteString("^BC")
+
+	if bc.Height > 0 {
+		sb.WriteString("," + strconv.Itoa(bc.Height))
+	}
+
 	sb.WriteString(`^FH\^FD`)
 	sb.WriteString(bc.Code)
 	sb.WriteString("^FS")
