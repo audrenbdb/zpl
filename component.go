@@ -302,8 +302,9 @@ func NewSquare(x, y, width, height int) Square {
 			X: x,
 			Y: y,
 		},
-		Width:     width,
-		Height:    height,
+		Width: width,
+		// 5 is the minimum value for this component.
+		Height:    max(height, 5),
 		Thickness: 5,
 	}
 }
@@ -332,7 +333,7 @@ func (s Square) String() string {
 	sb.WriteString("^GB")
 	sb.WriteString(strconv.Itoa(s.Width))
 	sb.WriteString(",")
-	sb.WriteString(strconv.Itoa(max(s.Height, 5)))
+	sb.WriteString(strconv.Itoa(s.Height))
 	sb.WriteString(",")
 	sb.WriteString(strconv.Itoa(s.Thickness))
 	sb.WriteString("^FS")
