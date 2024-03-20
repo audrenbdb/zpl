@@ -332,9 +332,9 @@ func (s Square) String() string {
 	sb.WriteString("^GB")
 	sb.WriteString(strconv.Itoa(s.Width))
 	sb.WriteString(",")
-	sb.WriteString(strconv.Itoa(s.Height))
+	sb.WriteString(strconv.Itoa(max(s.Height, 5)))
 	sb.WriteString(",")
-	sb.WriteString(strconv.Itoa(max(s.Thickness, 5)))
+	sb.WriteString(strconv.Itoa(s.Thickness))
 	sb.WriteString("^FS")
 
 	if s.TexturedBackground {
