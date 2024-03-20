@@ -9,14 +9,6 @@ import (
 
 type Component fmt.Stringer
 
-type Alignment int
-
-const (
-	Left Alignment = iota
-	Right
-	Auto
-)
-
 // Coordinates of top left corner of the current field.
 type Coordinates struct {
 	// X represents the field position x-coordinate, in dots.
@@ -100,9 +92,8 @@ type Line struct {
 	Text string
 	Bold bool
 	Coordinates
-	Alignment Alignment
-	Font      Font
-	Reversed  bool
+	Font     Font
+	Reversed bool
 }
 
 func (l Line) WithBold() Line {
@@ -159,7 +150,7 @@ func (l Line) String() string {
 
 	// text
 	sb.WriteString(`^FH\^FD`)
-	sb.WriteString(l.Text)
+	sb.WriteString(escape(l.Text))
 
 	// end field
 	sb.WriteString("^FS")
@@ -238,7 +229,7 @@ func (tb TextBlock) String() string {
 	}
 
 	sb.WriteString(`^FH\^FD`)
-	sb.WriteString(tb.Text)
+	sb.WriteString(escape(tb.Text))
 
 	// end field
 	sb.WriteString("^FS")
@@ -415,4 +406,13 @@ func (q QRBarCode) String() string {
 	sb.WriteString("^FS")
 
 	return sb.String()
+}
+
+// escape takes any characters that ZPL-reserved, such as ~
+// and replace it with the HEX representation.
+func escape(in string) string {
+	out := strings.ReplaceAll(in, `\`, `\1F`)
+	out = strings.ReplaceAll(in, "~", `\7E`)
+
+	return strings.ReplaceAll(out, "^", `\5E`)
 }
