@@ -334,7 +334,7 @@ func (s Square) String() string {
 	sb.WriteString(",")
 	sb.WriteString(strconv.Itoa(s.Height))
 	sb.WriteString(",")
-	sb.WriteString(strconv.Itoa(s.Thickness))
+	sb.WriteString(strconv.Itoa(max(s.Thickness, 5)))
 	sb.WriteString("^FS")
 
 	if s.TexturedBackground {
