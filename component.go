@@ -74,11 +74,14 @@ func (bc BarCode128) String() string {
 	sb.WriteString(bc.Coordinates.String())
 
 	// bar code
-	sb.WriteString("^BC")
+	sb.WriteString("^BC,")
 
 	if bc.Height > 0 {
-		sb.WriteString("," + strconv.Itoa(bc.Height))
+		sb.WriteString(strconv.Itoa(bc.Height))
 	}
+
+	// mode
+	sb.WriteString(",,,,A")
 
 	sb.WriteString(`^FH\^FD`)
 	sb.WriteString(bc.Code)
