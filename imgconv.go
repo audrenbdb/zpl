@@ -15,7 +15,7 @@ var mapCode = map[int]string{
 }
 
 func convertFromImage(img image.Image) string {
-	var blackLimit = 380
+	blackLimit := 380
 	var total int
 	var widthBytes int
 	var index int

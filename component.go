@@ -9,6 +9,62 @@ import (
 
 type Component fmt.Stringer
 
+type BarCodeConfig struct {
+	// Width of the bar code module, in dots.
+	// Any number between 1 and 100 may be used.
+	//
+	// The default value is 2.
+	Width int
+	// WidthRatio between wide bars and narrow bars. Any decimal number between 2 and 3 may be used.
+	//
+	// The number must be a multiple of 0.1 (i.e. 2.0, 2.1, 2.2, 2.3, ... , 2.9, 3.0).
+	//
+	// Larger numbers generally result in fewer bar code scan failures.
+	// The default value is 3.
+	WidthRatio int
+	// The default bar code height, in dots.
+	// Any positive number may be used.
+	//
+	// The default value is 10.
+	Height int
+}
+
+func (bc BarCodeConfig) String() string {
+	var sb strings.Builder
+
+	sb.WriteString("^BY")
+	sb.WriteString(strconv.Itoa(bc.Width))
+	sb.WriteString(",")
+	sb.WriteString(strconv.Itoa(bc.WidthRatio))
+	sb.WriteString(",")
+	sb.WriteString(strconv.Itoa(bc.Height))
+
+	return sb.String()
+}
+
+func NewBarCodeConfig() BarCodeConfig {
+	return BarCodeConfig{
+		Width:      2,
+		WidthRatio: 3,
+		Height:     10,
+	}
+}
+
+func (x BarCodeConfig) WithWidth(width int) BarCodeConfig {
+	x.Width = width
+	return x
+}
+
+func (x BarCodeConfig) WithWidthRatio(widthRatio int) BarCodeConfig {
+	x.WidthRatio = widthRatio
+	return x
+}
+
+func (x BarCodeConfig) WithHeight(height int) BarCodeConfig {
+	x.Height = height
+	return x
+}
+
 // Coordinates of top left corner of the current field.
 type Coordinates struct {
 	// X represents the field position x-coordinate, in dots.
@@ -42,6 +98,13 @@ func (f Font) String() string {
 	sb.WriteString(strconv.Itoa(f.Width))
 
 	return sb.String()
+}
+
+func NewFont(height, width int) Font {
+	return Font{
+		Height: height,
+		Width:  width,
+	}
 }
 
 // BarCode128 builds a field as a Code 128 bar code.
@@ -161,6 +224,15 @@ func (l Line) String() string {
 	return sb.String()
 }
 
+type TextBlockAlignment string
+
+const (
+	TextBlockAlignmentLeft      = "L"
+	TextBlockAlignmentCenter    = "C"
+	TextBlockAlignmentRight     = "R"
+	TextBlockAlignmentJustified = "J"
+)
+
 type TextBlock struct {
 	Text string
 	Font
@@ -170,7 +242,8 @@ type TextBlock struct {
 	MaxLines    int
 	LineSpacing int
 
-	Reversed bool
+	Reversed  bool
+	Alignment TextBlockAlignment
 }
 
 func NewTextBlock(x, y, width int, text string) TextBlock {
@@ -187,6 +260,7 @@ func NewTextBlock(x, y, width int, text string) TextBlock {
 		Width:       width,
 		MaxLines:    5,
 		LineSpacing: 0,
+		Alignment:   TextBlockAlignmentLeft,
 	}
 }
 
@@ -212,6 +286,11 @@ func (tb TextBlock) WithFontSize(size int) TextBlock {
 	return tb
 }
 
+func (tb TextBlock) WithAlignment(alignment TextBlockAlignment) TextBlock {
+	tb.Alignment = alignment
+	return tb
+}
+
 func (tb TextBlock) String() string {
 	var sb strings.Builder
 
@@ -226,6 +305,7 @@ func (tb TextBlock) String() string {
 	sb.WriteString(strconv.Itoa(tb.MaxLines))
 	sb.WriteString(",")
 	sb.WriteString(strconv.Itoa(tb.LineSpacing))
+	sb.WriteString("," + string(tb.Alignment))
 
 	if tb.Reversed {
 		sb.WriteString("^FR")
@@ -419,4 +499,15 @@ func escape(in string) string {
 	out = strings.ReplaceAll(in, "~", `\7E`)
 
 	return strings.ReplaceAll(out, "^", `\5E`)
+}
+
+// Raw is a flexible type where the consumer provide valid ZPL string.
+type Raw string
+
+func (x Raw) String() string {
+	return string(x)
+}
+
+func NewRaw(raw string) Raw {
+	return Raw(raw)
 }

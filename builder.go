@@ -25,41 +25,7 @@ type Builder struct {
 	Width int
 	// Shifts all label content to the left or the right.
 	ShiftDistance int
-	BarCodeConfig BarCodeConfig
 	Components    []Component
-}
-
-type BarCodeConfig struct {
-	// Width of the bar code module, in dots.
-	// Any number between 1 and 100 may be used.
-	//
-	// The default value is 2.
-	Width int
-	// WidthRatio between wide bars and narrow bars. Any decimal number between 2 and 3 may be used.
-	//
-	// The number must be a multiple of 0.1 (i.e. 2.0, 2.1, 2.2, 2.3, ... , 2.9, 3.0).
-	//
-	// Larger numbers generally result in fewer bar code scan failures.
-	// The default value is 3.
-	WidthRatio int
-	// The default bar code height, in dots.
-	// Any positive number may be used.
-	//
-	// The default value is 10.
-	Height int
-}
-
-func (bc BarCodeConfig) String() string {
-	var sb strings.Builder
-
-	sb.WriteString("^BY")
-	sb.WriteString(strconv.Itoa(bc.Width))
-	sb.WriteString(",")
-	sb.WriteString(strconv.Itoa(bc.WidthRatio))
-	sb.WriteString(",")
-	sb.WriteString(strconv.Itoa(bc.Height))
-
-	return sb.String()
 }
 
 func NewBuilder() *Builder {
@@ -67,11 +33,7 @@ func NewBuilder() *Builder {
 		Darkness:      15,
 		Width:         812,
 		ShiftDistance: 0,
-		BarCodeConfig: BarCodeConfig{
-			Width:      2,
-			WidthRatio: 3,
-			Height:     10,
-		},
+		Components:    []Component{},
 	}
 }
 
@@ -87,11 +49,6 @@ func (b *Builder) WithDarkness(darkness int) *Builder {
 
 func (b *Builder) WithShiftDistance(shiftDistance int) *Builder {
 	b.ShiftDistance = shiftDistance
-	return b
-}
-
-func (b *Builder) WithBarCodeConfigHeight(height int) *Builder {
-	b.BarCodeConfig.Height = height
 	return b
 }
 
@@ -113,7 +70,6 @@ func (b *Builder) String() string {
 	sb.WriteString("^MMT")                                // Post print action tear off.
 	sb.WriteString("^PW" + strconv.Itoa(b.Width))         // Label width.
 	sb.WriteString("^LS" + strconv.Itoa(b.ShiftDistance)) // Shift distance (can be negative to shift left).
-	sb.WriteString(b.BarCodeConfig.String())              // Bar code field default.
 	sb.WriteString("^PQ1,0,1,Y")                          // Print quantity, pause, replicate, and tear off.
 
 	for _, c := range b.Components {
