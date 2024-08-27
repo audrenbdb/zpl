@@ -9,6 +9,12 @@ import (
 
 type Component fmt.Stringer
 
+type BarCodeMode string
+
+const (
+	BarCodeModeAuto BarCodeMode = "A"
+)
+
 type BarCodeConfig struct {
 	// Width of the bar code module, in dots.
 	// Any number between 1 and 100 may be used.
@@ -113,6 +119,7 @@ type BarCode128 struct {
 	// Code is the code to display as an EAN 128 bar code.
 	Code   string
 	Height int
+	Mode   BarCodeMode
 }
 
 func NewBarCode(x, y int, code string) BarCode128 {
@@ -143,8 +150,11 @@ func (bc BarCode128) String() string {
 		sb.WriteString(strconv.Itoa(bc.Height))
 	}
 
-	// mode
-	sb.WriteString(",,,,A")
+	// mode if any
+	switch bc.Mode {
+	case BarCodeModeAuto:
+		sb.WriteString(",,,,A")
+	}
 
 	sb.WriteString(`^FH\^FD`)
 	sb.WriteString(bc.Code)
