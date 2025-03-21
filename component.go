@@ -401,6 +401,11 @@ type Square struct {
 	TexturedBackground bool
 }
 
+func (x Square) WithHeight(height int) Square {
+	x.Height = height
+	return x
+}
+
 func NewVerticalLine(x, y, height, thickness int) Square {
 	return Square{
 		Coordinates: Coordinates{
