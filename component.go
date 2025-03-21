@@ -35,6 +35,15 @@ type BarCodeConfig struct {
 	Height int
 }
 
+type Orientation string
+
+const (
+	OrientationNone Orientation = "N"
+	Orientation90   Orientation = "R"
+	Orientation180  Orientation = "I"
+	Orientation270  Orientation = "B"
+)
+
 func (bc BarCodeConfig) String() string {
 	var sb strings.Builder
 
@@ -116,6 +125,8 @@ func NewFont(height, width int) Font {
 // BarCode128 builds a field as a Code 128 bar code.
 type BarCode128 struct {
 	Coordinates
+	Orientation Orientation
+	Line        string
 	// Code is the code to display as an EAN 128 bar code.
 	Code   string
 	Height int
@@ -124,12 +135,25 @@ type BarCode128 struct {
 
 func NewBarCode(x, y int, code string) BarCode128 {
 	return BarCode128{
-		Code: code,
+		Code:        code,
+		Orientation: OrientationNone,
+		Line:        "Y",
 		Coordinates: Coordinates{
 			X: x,
 			Y: y,
 		},
+		Mode: "N",
 	}
+}
+
+func (bc BarCode128) WithOrientation(orientation Orientation) BarCode128 {
+	bc.Orientation = orientation
+	return bc
+}
+
+func (bc BarCode128) WithoutHumanReadableText() BarCode128 {
+	bc.Line = "N"
+	return bc
 }
 
 func (bc BarCode128) WithHeight(height int) BarCode128 {
@@ -144,17 +168,29 @@ func (bc BarCode128) String() string {
 	sb.WriteString(bc.Coordinates.String())
 
 	// bar code
-	sb.WriteString("^BC,")
+	sb.WriteString("^BC")
+
+	// rotation
+	sb.WriteString(string(bc.Orientation))
+	sb.WriteString(",")
 
 	if bc.Height > 0 {
 		sb.WriteString(strconv.Itoa(bc.Height))
 	}
+	sb.WriteString(",")
 
-	// mode if any
-	switch bc.Mode {
-	case BarCodeModeAuto:
-		sb.WriteString(",,,,A")
-	}
+	// human readable text
+	sb.WriteString(bc.Line)
+	sb.WriteString(",")
+
+	// line above
+	sb.WriteString("N,")
+
+	// check digit
+	sb.WriteString("N,")
+
+	// mode
+	sb.WriteString(string(bc.Mode))
 
 	sb.WriteString(`^FH\^FD`)
 	sb.WriteString(bc.Code)
@@ -506,7 +542,7 @@ func (q QRBarCode) String() string {
 // and replace it with the HEX representation.
 func escape(in string) string {
 	out := strings.ReplaceAll(in, `\`, `\1F`)
-	out = strings.ReplaceAll(in, "~", `\7E`)
+	out = strings.ReplaceAll(out, "~", `\7E`)
 
 	return strings.ReplaceAll(out, "^", `\5E`)
 }
