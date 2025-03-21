@@ -53,27 +53,25 @@ func (b *Builder) WithShiftDistance(shiftDistance int) *Builder {
 }
 
 func (b *Builder) WithComponents(components ...Component) *Builder {
-	for _, component := range components {
-		b.Components = append(b.Components, component)
-	}
-
+	b.Components = append(b.Components, components...)
 	return b
 }
 
 func (b *Builder) String() string {
 	var sb strings.Builder
 
-	sb.WriteString("^XA")                                 // Start of label.
-	sb.WriteString("~SD" + strconv.Itoa(b.Darkness))      // Set darkness.
-	sb.WriteString("^LRN")                                // Disable reverse printing.
-	sb.WriteString("^CI28")                               // UTF-8 encoding.
-	sb.WriteString("^MMT")                                // Post print action tear off.
-	sb.WriteString("^PW" + strconv.Itoa(b.Width))         // Label width.
-	sb.WriteString("^LS" + strconv.Itoa(b.ShiftDistance)) // Shift distance (can be negative to shift left).
-	sb.WriteString("^PQ1,0,1,Y")                          // Print quantity, pause, replicate, and tear off.
+	sb.WriteString("^XA\n")                                      // Start of label.
+	sb.WriteString("~SD" + strconv.Itoa(b.Darkness) + "\n")      // Set darkness.
+	sb.WriteString("^LRN\n")                                     // Disable reverse printing.
+	sb.WriteString("^CI28\n")                                    // UTF-8 encoding.
+	sb.WriteString("^MMT\n")                                     // Post print action tear off.
+	sb.WriteString("^PW" + strconv.Itoa(b.Width) + "\n")         // Label width.
+	sb.WriteString("^LS" + strconv.Itoa(b.ShiftDistance) + "\n") // Shift distance (can be negative to shift left).
+	sb.WriteString("^PQ1,0,1,Y" + "\n")                          // Print quantity, pause, replicate, and tear off.
 
 	for _, c := range b.Components {
 		sb.WriteString(c.String())
+		sb.WriteString("\n")
 	}
 
 	sb.WriteString("^XZ") // End of label.
